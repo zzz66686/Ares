@@ -1,23 +1,18 @@
-import json
-import base64
 import os
 from datetime import datetime
-import tempfile
-import shutil
+
 
 from flask import Blueprint
 from flask import request
 from flask import abort
 from flask import current_app
 from flask import url_for
-from flask import send_file
 from flask import render_template
 from werkzeug.utils import secure_filename
-import pygeoip
+
 from flask import flash
 from flask import redirect
-from flask import escape
-import cgi
+
 
 from webui import require_admin
 from models import db
@@ -26,15 +21,9 @@ from models import Command
 
 
 api = Blueprint('api', __name__)
-GEOIP = pygeoip.GeoIP('api/GeoIP.dat', pygeoip.MEMORY_CACHE)
 
 
-def geolocation(ip):
-    geoloc_str = 'Local'
-    info = GEOIP.record_by_addr(ip)
-    if info:
-        geoloc_str = info['city'] + ' [' + info['country_code'] + ']'
-    return geoloc_str
+
 
 
 @api.route('/massexec', methods=['POST'])
@@ -88,7 +77,7 @@ def get_command(agent_id):
             agent.username = info['username']
     agent.last_online = datetime.now()
     agent.remote_ip = request.remote_addr
-    agent.geolocation = geolocation(agent.remote_ip)
+
     db.session.commit()
     # Return pending commands for the agent
     cmd_to_run = ''
@@ -106,7 +95,7 @@ def report_command(agent_id):
     if not agent:
         abort(404)
     out = request.form['output']
-    agent.output += cgi.escape(out)
+    agent.output += out
     db.session.add(agent)
     db.session.commit()
     return ''
