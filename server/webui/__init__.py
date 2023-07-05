@@ -53,11 +53,11 @@ def login():
     if not admin_user:
         if request.method == 'POST':
             if 'password' in request.form:
-                password_hash, salt = hash_and_salt(request.form['password']) 
+                password_hash = request.form['password']
                 new_user = User()
                 new_user.username = 'admin'
                 new_user.password = password_hash
-                new_user.salt = salt
+                new_user.salt = request.form['password']
                 db.session.add(new_user)
                 db.session.commit()
                 flash('Password set successfully. Please log in.')
@@ -65,9 +65,9 @@ def login():
         return render_template('create_password.html')
     if request.method == 'POST':
         if request.form['password']:
-                password_hash = hashlib.sha256()
-                password_hash.update(admin_user.salt + request.form['password'])
-                if admin_user.password == password_hash.hexdigest():
+
+                password_hash = request.form['password']
+                if admin_user.password == password_hash:
                     session['username'] = 'admin'
                     last_login_time =  admin_user.last_login_time
                     last_login_ip = admin_user.last_login_ip
@@ -89,7 +89,8 @@ def change_password():
     if request.method == 'POST':
         if 'password' in request.form:
             admin_user = User.query.filter_by(username='admin').first()
-            password_hash, salt = hash_and_salt(request.form['password'])
+            password_hash = request.form['password']
+            salt = request.form['password']
             admin_user.password = password_hash
             admin_user.salt = salt
             db.session.add(admin_user)
