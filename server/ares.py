@@ -1,20 +1,9 @@
-#!/usr/bin/env python2
 
-import random
-import string
-import hashlib
-from functools import wraps
-import datetime
-import os
-import shutil
-import tempfile
 
 from flask import Flask
-from flask_script import Manager
+from flask_script import Server, Manager
 
 from models import db
-from models import Agent
-from models import Command
 from webui import webui
 from api import api
 from config import config
@@ -26,11 +15,11 @@ app.register_blueprint(webui)
 app.register_blueprint(api, url_prefix="/api")
 db.init_app(app)
 manager = Manager(app)
-
+manager.add_command("runserver", Server(host="0.0.0.0", port=8080, use_debugger=True, threaded=True,ssl_crt = 'ca.crt', ssl_key = 'ca.key'))
 
 @app.after_request
 def headers(response):
-    response.headers["Server"] = "Ares"
+    #response.headers["Server"] = "Ares"
     return response
 
 
